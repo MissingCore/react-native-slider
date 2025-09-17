@@ -138,6 +138,10 @@ const indexOfLowest = (values: Array<number>): number => {
     return lowestIndex;
 };
 
+const onRTLDecide = <T, U>(valIfTrue: T, valIfFalse: U) => {
+    return I18nManager.isRTL ? valIfTrue : valIfFalse;
+}
+
 export class Slider extends PureComponent<SliderProps, SliderState> {
     constructor(props: SliderProps) {
         super(props);
@@ -392,11 +396,13 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
     };
     _getThumbLeft = (value: number) => {
         const {containerSize, thumbSize} = this.state;
-        const {vertical} = this.props;
+        const {invert, vertical} = this.props;
 
         const standardRatio = this._getRatio(value);
 
-        const ratio = I18nManager.isRTL ? 1 - standardRatio : standardRatio;
+        const ratio = invert
+            ? onRTLDecide(standardRatio, 1 - standardRatio)
+            : onRTLDecide(1 - standardRatio, standardRatio)
         return (
             ratio *
             ((vertical ? containerSize.height : containerSize.width) -
@@ -405,13 +411,15 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
     };
     _getValue = (gestureState: {dx: number; dy: number}) => {
         const {containerSize, thumbSize, values} = this.state;
-        const {maximumValue, minimumValue, step, vertical} = this.props;
+        const {invert, maximumValue, minimumValue, step, vertical} = this.props;
         const length = containerSize.width - thumbSize.width;
         const thumbLeft = vertical
             ? this._previousLeft + gestureState.dy * -1
             : this._previousLeft + gestureState.dx;
         const nonRtlRatio = thumbLeft / length;
-        const ratio = I18nManager.isRTL ? 1 - nonRtlRatio : nonRtlRatio;
+        const ratio = invert
+            ? onRTLDecide(nonRtlRatio, 1 - nonRtlRatio)
+            : onRTLDecide(1 - nonRtlRatio, nonRtlRatio);
         let minValue = minimumValue;
         let maxValue = maximumValue;
 
@@ -651,6 +659,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         const {
             containerStyle,
             debugTouchArea,
+            invert,
             maximumTrackTintColor,
             maximumValue,
             minimumTrackTintColor,
@@ -687,9 +696,15 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         const interpolatedThumbValues = values.map((value) =>
             value.interpolate({
                 inputRange: [minimumValue, maximumValue],
-                outputRange: I18nManager.isRTL
-                    ? [0, -(containerSize.width - rightPadding)]
-                    : [0, containerSize.width - rightPadding],
+                outputRange: invert
+                    ? onRTLDecide(
+                        [0, containerSize.width - rightPadding],
+                        [0, -(containerSize.width - rightPadding)],
+                    )
+                    : onRTLDecide(
+                        [0, -(containerSize.width - rightPadding)],
+                        [0, containerSize.width - rightPadding],
+                    ),
             }),
         );
         const interpolatedTrackValues = values.map((value) =>
@@ -703,9 +718,15 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
             trackMarksValues.map((v) =>
                 v.interpolate({
                     inputRange: [minimumValue, maximumValue],
-                    outputRange: I18nManager.isRTL
-                        ? [0, -(containerSize.width - rightPadding)]
-                        : [0, containerSize.width - rightPadding],
+                    outputRange: invert
+                        ? onRTLDecide(
+                            [0, containerSize.width - rightPadding],
+                            [0, -(containerSize.width - rightPadding)],
+                        )
+                        : onRTLDecide(
+                            [0, -(containerSize.width - rightPadding)],
+                            [0, containerSize.width - rightPadding],
+                        ),
                 }),
             );
         const valueVisibleStyle = {} as ViewStyle;

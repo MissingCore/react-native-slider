@@ -24,6 +24,8 @@ export type SliderProps = {
     containerStyle?: ViewStyle;
     debugTouchArea?: boolean;
     disabled?: boolean;
+    /** Invert appearance & functionality given `i18nManager` is enabled. */
+    invert?: boolean;
     maximumTrackTintColor?: string;
     maximumTrackStyle?: ViewStyle;
     maximumValue: number;
