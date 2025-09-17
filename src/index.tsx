@@ -695,7 +695,12 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         const interpolatedThumbValues = values.map((value) =>
             value.interpolate({
                 inputRange: [minimumValue, maximumValue],
-                outputRange: onRTLDecide(
+                outputRange: inverted
+                    ? onRTLDecide(
+                        [0, containerSize.width - rightPadding],
+                        [0, -(containerSize.width - rightPadding)],
+                    )
+                    : onRTLDecide(
                         [0, -(containerSize.width - rightPadding)],
                         [0, containerSize.width - rightPadding],
                     ),
@@ -750,7 +755,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
 
         const minimumTrackStyle = {
             position: 'absolute',
-            left:
+            [inverted ? "right" : "left"]:
                 interpolatedTrackValues.length === 1
                     ? new Animated.Value(startPositionOnTrack)
                     : Animated.add(minTrackWidth, thumbSize.width / 2),
@@ -879,6 +884,9 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
                                           backgroundColor: thumbTintColor,
                                           ...thumbStyle,
                                       },
+                                inverted
+                                      ? { right: 0 }
+                                      : {},
                                 {
                                     transform: [
                                         {
