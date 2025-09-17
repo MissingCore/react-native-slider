@@ -626,6 +626,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
             top: y,
             width,
         };
+        const styles = this.props.inverted ? defaultInvertedStyles : defaultStyles;
         return (
             <Animated.View
                 key={`debug-thumb-${index}`}
