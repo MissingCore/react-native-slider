@@ -12,7 +12,7 @@ import {
     ViewStyle,
 } from 'react-native';
 // styles
-import {defaultStyles as styles} from './styles';
+import {defaultStyles, defaultInvertedStyles} from './styles';
 import type {Dimensions, SliderProps, SliderState} from './types';
 
 export type {SliderProps} from './types';
@@ -396,13 +396,11 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
     };
     _getThumbLeft = (value: number) => {
         const {containerSize, thumbSize} = this.state;
-        const {invert, vertical} = this.props;
+        const {vertical} = this.props;
 
         const standardRatio = this._getRatio(value);
 
-        const ratio = invert
-            ? onRTLDecide(standardRatio, 1 - standardRatio)
-            : onRTLDecide(1 - standardRatio, standardRatio)
+        const ratio = onRTLDecide(1 - standardRatio, standardRatio)
         return (
             ratio *
             ((vertical ? containerSize.height : containerSize.width) -
@@ -411,13 +409,13 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
     };
     _getValue = (gestureState: {dx: number; dy: number}) => {
         const {containerSize, thumbSize, values} = this.state;
-        const {invert, maximumValue, minimumValue, step, vertical} = this.props;
+        const {inverted, maximumValue, minimumValue, step, vertical} = this.props;
         const length = containerSize.width - thumbSize.width;
         const thumbLeft = vertical
             ? this._previousLeft + gestureState.dy * -1
             : this._previousLeft + gestureState.dx;
         const nonRtlRatio = thumbLeft / length;
-        const ratio = invert
+        const ratio = inverted
             ? onRTLDecide(nonRtlRatio, 1 - nonRtlRatio)
             : onRTLDecide(1 - nonRtlRatio, nonRtlRatio);
         let minValue = minimumValue;
@@ -659,7 +657,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         const {
             containerStyle,
             debugTouchArea,
-            invert,
+            inverted,
             maximumTrackTintColor,
             maximumValue,
             minimumTrackTintColor,
@@ -696,12 +694,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         const interpolatedThumbValues = values.map((value) =>
             value.interpolate({
                 inputRange: [minimumValue, maximumValue],
-                outputRange: invert
-                    ? onRTLDecide(
-                        [0, containerSize.width - rightPadding],
-                        [0, -(containerSize.width - rightPadding)],
-                    )
-                    : onRTLDecide(
+                outputRange: onRTLDecide(
                         [0, -(containerSize.width - rightPadding)],
                         [0, containerSize.width - rightPadding],
                     ),
@@ -718,12 +711,7 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
             trackMarksValues.map((v) =>
                 v.interpolate({
                     inputRange: [minimumValue, maximumValue],
-                    outputRange: invert
-                        ? onRTLDecide(
-                            [0, containerSize.width - rightPadding],
-                            [0, -(containerSize.width - rightPadding)],
-                        )
-                        : onRTLDecide(
+                    outputRange: onRTLDecide(
                             [0, -(containerSize.width - rightPadding)],
                             [0, containerSize.width - rightPadding],
                         ),
@@ -778,6 +766,8 @@ export class Slider extends PureComponent<SliderProps, SliderState> {
         } as ViewStyle;
 
         const touchOverflowStyle = this._getTouchOverflowStyle();
+
+        const styles = inverted ? defaultInvertedStyles : defaultStyles;
 
         return (
             <>
